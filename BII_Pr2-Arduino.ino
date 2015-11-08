@@ -5,7 +5,7 @@
  **************************************************************************/
 
 // White
-#define BUTTON_PIN 2
+#define BUTTON_PIN 5
 
 // Green
 #define LIGHTSENSOR_PIN 3
@@ -25,6 +25,9 @@
 #include "Adafruit_Sensor.h"
 #include "Adafruit_BME280.h"
 
+// Software serial for RFID reader
+#include <SoftwareSerial.h>
+SoftwareSerial RFID(2, 3); // RX and TX
 
 // Struct carrying BME280 data
 struct Bme280Data {
@@ -68,6 +71,9 @@ void setup() {
     while (1);
   };
 
+  // Init software serial for RFID reader
+  RFID.begin(9600);
+
   // Flush serial buffer
   while (Serial.available() && Serial.read() != '\n');
 }
@@ -95,6 +101,9 @@ void loop() {
 
   // Read LED value
   readSerialCommand();
+
+  // Read RFID reader
+  readRfidReader();
 
   // Since we are running at 24 FPS, Frametime is ~40msec
   delay(20);
@@ -142,5 +151,19 @@ void readSerialCommand() {
     // Flush serial buffer
     while (Serial.available() && Serial.read() != '\n');
   }
+}
+
+void readRfidReader() {
+  int data;
+  Serial.print("r\t");
+  if (RFID.available())
+    while (RFID.available() > 0)
+    {
+      data = RFID.read();
+      Serial.print(data);
+    }
+  else
+  Serial.print("no");
+  Serial.println();
 }
 
